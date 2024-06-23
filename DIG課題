@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" media="screen" href="style.css">
+    <title>車で神経衰弱</title>
+</head>
+
+<body>
+    <div id="buttonbox">
+        <button id="reload">やり直す</button>
+        <button id="button">答えを見る</button>
+    </div>
+    <div id="game_board">
+    </div>
+    <!-- <div id="result">経過秒数:</div> -->
+    <script src="script.js"></script>
+
+</body>
+
+</html>
+
+
+
+
+
+
+"use script"
+// //開始時間
+// let startTime;
+// //経過時間　タイマーID
+// let timer;
+// //カードめくり用　タイマーID(動作中はカードがめくれないようにする)
+// let backTimer;
+
+//                       カード作成処理         
+
+let imgArray = [
+    "アルファード", "ハイエース", "ライズ", "プラド", "ハリアー", "RAV4", "ヤリスクロス", "ヴェルファイア", "プリウス", "レクサスLC"
+]
+
+let imgNumArray = [];
+for (let i = 0; i < 10; i++) {//画像のURLが入った配列作成
+    imgNumArray.push("<img src='画像/" + imgArray[i] + ".jpg'>")
+}
+
+
+let array = [];
+function numberPea() {
+    for (let i = 0; i < 10; i++) {
+        array.push(i);
+        array.push(i);
+    }
+}
+numberPea();//0~9のペアが入った配列を作成
+
+//シャッフル用関数
+// function shuffle(array) {
+//     let n = array.length;
+//     while (n) {
+//         i = Math.floor(Math.random() * n--);
+//         [array[n], array[i]] = [array[i], array[n]]
+//     }
+//     return array;
+// }
+
+function shuffle(array){
+    for (let i = array.length-1 ;i >= 0; i--){
+        let r = Math.floor(Math.random() * i);//ランダムな整数を代入
+        let value = array[i];//ループ時の値を代入
+        array[i] = array[r];//ループ時の値にランダム整数で取得したインデックス番号の値を代入
+        array[r] = value;//ランダム整数で取得したインデックス番号の値にループ時の値を代入(入れ替え)
+        
+    }
+    return array;
+}
+shuffle(array);
+
+let game_board = document.getElementById("game_board");
+
+//div要素作成(カード);
+for (i = 0; i < 20; i++) {
+    let div = document.createElement("div");
+    div.className ="card";//カードの裏側を表示するためのタグ
+    div.number = array[i];// カードにインデックス番号を追加
+    div.addEventListener("click",turn);//クリックイベントを追加
+    game_board.appendChild(div);//土台に各divを追加
+}
+
+
+//   　　　　　　　　　　　　　　　　　　　　//ここからカードクリック時の処理//
+
+// startTime = new Date(); //開始時刻を取得
+// startTimer();
+
+//一枚目かどうかのフラグ(1枚目:true 2枚目:false)
+let firstDraw = 0;
+//一枚目のカードを格納
+let firstCard;
+//揃えた枚数(ペアができるたびに+1 10ペアで終了させる)
+let countUnit = 0;
+
+//カードクリック時の処理;
+function turn(event) {
+    let div = event.target;
+    //カードのタイマー処理が動作中はreturn 
+    // if (backTimer) return;//連続で押せないように
+    //裏向きのカードをクリックした場合は画像を表示する
+    if (div.innerText == '') {
+        // div.className = 'card';//backというクラス名を取り除いている
+        div.innerHTML = imgNumArray[div.number];//カードに追加されたインデックス番号の画像をurlとして指定して代入
+    } else {
+        return//数字が表示されているカードはなにもしない
+    }
+
+    if (firstDraw === 0) {//一枚目のドローだったら
+        firstCard = div;//カードの情報を収納
+        firstDraw = 1;//1を代入→二枚目の処理へ
+    } else {//二枚目の処理
+        if (firstCard.number === div.number) {//二枚目のドローカードの番号が今引いた番号と一緒だったら
+            countUnit++;//カウンターに +1 (10で終了させる)
+            
+        } else {
+            div.innerHTML = imgNumArray[div.number];
+            setTimeout(function() {
+                div.innerHTML = "";
+                firstCard.innerText = '';
+                // div.innerText = ''//カードを裏側に戻す
+                // firstCard = null;
+            }, 500);
+           
+            
+            
+            // div.className = 'card back';
+                // firstCard.className = 'card back';
+                // backTimer = NaN;
+            
+        }
+        firstDraw = 0;
+    }
+}
+// //タイマー開始
+// function startTimer() {
+//     timer = setInterval(showSecond, 1000);
+// }
+// //秒数表示
+// function showSecond() {
+//     let nowTime = new Date();
+//     let elapsedTime = Math.floor((nowTime - startTime) / 1000);
+//     let str = '経過秒数:' + elapsedTime + '秒';
+//     let re = document.getElementById('result');
+//     re.innerHTML = str;
+// }
+
+document.getElementById("button").addEventListener("click", function () {
+    let cards = document.querySelectorAll(".card");
+    for (let i = 0; i < cards.length; i++) {
+        cards[i].innerHTML = imgNumArray[cards[i].number];
+    }
+});
+
+document.getElementById("reload").addEventListener("click",function(){
+    window.location.reload();
+})
+
+
+
+
+body {
+    
+    background-color: rgb(97, 96, 93);
+    /* background-image: url("カード裏面.jpeg"); */
+}
+
+#game_board {
+    
+    
+    width: 770px;
+    height: 840px;
+    margin: auto;
+    /* overflow: hidden; */
+}
+#space{
+    height: 50px;
+}
+
+.card {
+    width: 150px;
+    height:200px;
+    /* line-height: 10px; */
+    /* border: 1px; */
+    border-width: 20px;
+    border-radius: 10px;
+    text-align: center;
+    /* font-size: 30px; */
+    font-weight: bold;
+    box-shadow: gray;
+    /* background: rgb(247, 245, 245); */
+    background-image: url("画像/カード裏面.jpeg");
+    background-size: contain;
+    background-repeat: no-repeat; 
+    background-position: center;
+    float:left;
+    cursor: grab;
+    margin-bottom: 10px;
+}
+
+img {
+    width: 140px;
+    height: 200px;
+}
+/*  裏の状態 */;
+/* .back {
+    background-image: url("カード裏面.jpeg");
+    background-size: 120px 160px;
+} */
+/*終了時*/;
+.finish {
+    opacity: 0;
+    cursor: default;
+}
+
+/*経過時間*/
+#result {
+
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#button {
+    font-size: 25px;
+    background-color: red;
+    border-radius: 10px;
+    width: 200px;
+    display: block;
+    margin:auto;
+    margin: 10px 20px 0px 20px; 
+}
+#reload {
+    font-size: 25px;
+    background-color: yellow;
+    width: 200px;
+    border-radius: 10px;
+    display: block;
+    margin:auto;
+    margin: 10px 20px 0px 20px; 
+}
+#buttonbox {
+    display: flex;
+    justify-content: center;
+    /* gap: -50px;  */
+}
+ 
+/* #reload, #button {
+    margin: 10px 20px 0px 20px; 
+}  */
+
+#buttonbox {
+    margin-bottom: 20px;
+}
